@@ -8,12 +8,30 @@ import java.util.Map;
 public class ClojureScriptEngineFactory implements ScriptEngineFactory
 {
     private static final String engineName = "Clojure";
+
     private static final String engineVersion = "SVN HEAD";
+
     private static final String languageName = engineName;
+
     private static final String languageVersion = engineVersion;
-    private static final List<String> fileExtensions = new ArrayList<String>() {{ add("clj"); }};
-    private static final List<String> mimeTypes = new ArrayList<String>() {{ add("text/plain"); }};
-    private static final List<String> nickNames = new ArrayList<String>() {{ add("Clojure"); add("clojure"); add("clj"); }};
+
+    private static final List<String> fileExtensions = new ArrayList<String>()
+    {{
+        add("clj");
+    }};
+
+    private static final List<String> mimeTypes = new ArrayList<String>()
+    {{
+        add("text/plain");
+    }};
+
+    private static final List<String> nickNames = new ArrayList<String>()
+    {{
+        add("Clojure");
+        add("clojure");
+        add("clj");
+    }};
+
     private static final Map<String, String> parameters = new HashMap<String, String>()
     {{
         put("ScriptEngine.ENGINE",           engineName);
