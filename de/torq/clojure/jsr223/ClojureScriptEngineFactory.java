@@ -2,6 +2,8 @@ import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngine;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClojureScriptEngineFactory implements ScriptEngineFactory
 {
@@ -12,6 +14,15 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
     private static final List<String> fileExtensions = new ArrayList<String>() {{ add("clj"); }};
     private static final List<String> mimeTypes = new ArrayList<String>() {{ add("text/plain"); }};
     private static final List<String> nickNames = new ArrayList<String>() {{ add("Clojure"); add("clojure"); add("clj"); }};
+    private static final Map<String, String> parameters = new HashMap<String, String>()
+    {{
+        put("ScriptEngine.ENGINE",           engineName);
+        put("ScriptEngine.ENGINE_VERSION",   engineVersion);
+        put("ScriptEngine.NAME",             engineName);        // Not sure how this is different from ENGINE or LANGUAGE
+        put("ScriptEngine.LANGUAGE",         languageName);
+        put("ScriptEngine.LANGUAGE_VERSION", languageVersion);
+        put("THREADING",                     "MULTITHREADED");
+    }};
 
     @Override
     public String getEngineName()
@@ -94,7 +105,11 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
     @Override
     public Object getParameter(String key)
     {
-        return null;
+        // HashMap's get-method returns null when no mapping is found, which is
+        // also the behaviour that getParameter's specification wants, so we do
+        // not differentiate between null as key-not-there-indicator and null
+        // as actual value of the key
+        return parameters.get(key);
     }
 
     @Override
