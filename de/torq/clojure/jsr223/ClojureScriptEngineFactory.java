@@ -77,7 +77,18 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
     @Override
     public String getMethodCallSyntax(String obj, String m, String... args)
     {
-        return "";
+        StringBuilder result = new StringBuilder("(." + m);
+        result.append(" " + obj + " ");
+        for (int i = 0; i < args.length; i++) {
+            result.append(args[i]);
+            if (i == args.length - 1) {
+                result.append(")");
+            } else {
+                result.append(" ");
+            }
+        }
+
+        return result.toString();
     }
 
     @Override
