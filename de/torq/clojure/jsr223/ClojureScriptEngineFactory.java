@@ -39,7 +39,8 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
         put("ScriptEngine.NAME",             engineName);        // Not sure how this is different from ENGINE or LANGUAGE
         put("ScriptEngine.LANGUAGE",         languageName);
         put("ScriptEngine.LANGUAGE_VERSION", languageVersion);
-        put("THREADING",                     "MULTITHREADED");
+        put("THREADING",                     "MULTITHREADED");  // This could perhaps be "THREAD-ISOLATED", as Clojure's
+                                                                // top-level vars are bound thread-locally.
     }};
 
     @Override
