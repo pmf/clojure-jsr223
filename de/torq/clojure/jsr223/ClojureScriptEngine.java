@@ -6,8 +6,10 @@ import javax.script.Bindings;
 import javax.script.AbstractScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptContext;
+import javax.script.Invocable;
 
 public class ClojureScriptEngine extends AbstractScriptEngine
+                                 implements Invocable
 {
     @Override
     public ScriptEngineFactory getFactory()
@@ -33,5 +35,28 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         return null;
     }
 
+    @Override // Invocable-interface
+    public <T> T getInterface(Class<T> clasz)
+    {
+        return null;
+    }
+
+    @Override // Invocable-interface
+    public <T> T getInterface(Object thiz, Class<T> clasz)
+    {
+        return null;
+    }
+
+    @Override // Invocable-interface
+    public Object invokeFunction(String name, Object... args)
+    {
+        return null;
+    }
+
+    @Override // Invocable-interface
+    public Object invokeMethod(Object thiz, String name, Object... args)
+    {
+        return null;
+    }
 }
 
