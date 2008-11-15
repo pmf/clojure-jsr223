@@ -11,6 +11,12 @@ import javax.script.Invocable;
 public class ClojureScriptEngine extends AbstractScriptEngine
                                  implements Invocable
 {
+    public ClojureScriptEngine()
+    {
+        //Var.pushThreadBindings();
+        // How to call popThreadBindings?
+    }
+
     @Override
     public ScriptEngineFactory getFactory()
     {
@@ -35,25 +41,25 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         return null;
     }
 
-    @Override // Invocable-interface
+    @Override // required by Invocable-interface
     public <T> T getInterface(Class<T> clasz)
     {
         return null;
     }
 
-    @Override // Invocable-interface
+    @Override // required by Invocable-interface
     public <T> T getInterface(Object thiz, Class<T> clasz)
     {
         return null;
     }
 
-    @Override // Invocable-interface
+    @Override // required by Invocable-interface
     public Object invokeFunction(String name, Object... args)
     {
         return null;
     }
 
-    @Override // Invocable-interface
+    @Override // required by Invocable-interface
     public Object invokeMethod(Object thiz, String name, Object... args)
     {
         return null;

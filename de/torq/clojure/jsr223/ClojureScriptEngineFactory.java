@@ -38,7 +38,7 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
     {{
         put("ScriptEngine.ENGINE",           engineName);
         put("ScriptEngine.ENGINE_VERSION",   engineVersion);
-        put("ScriptEngine.NAME",             engineName);        // Not sure how this is different from ENGINE or LANGUAGE
+        put("ScriptEngine.NAME",             engineName);
         put("ScriptEngine.LANGUAGE",         languageName);
         put("ScriptEngine.LANGUAGE_VERSION", languageVersion);
         put("THREADING",                     "MULTITHREADED");  // This could perhaps be "THREAD-ISOLATED", as Clojure's
@@ -126,10 +126,10 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
     @Override
     public Object getParameter(String key)
     {
-        // HashMap's get-method returns null when no mapping is found, which is
-        // also the behaviour that getParameter's specification wants, so we do
-        // not differentiate between null as key-not-there-indicator and null
-        // as actual value of the key
+        // java.util.HashMap's get-method returns null when no mapping is
+        // found, which is also the behaviour that getParameter's specification
+        // wants, so we do not differentiate between null as
+        // key-not-there-indicator and null as actual value of the key
         return parameters.get(key);
     }
 
