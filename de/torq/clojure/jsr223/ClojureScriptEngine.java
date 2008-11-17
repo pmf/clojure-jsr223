@@ -1,17 +1,21 @@
 package de.torq.clojure.jsr223;
 
 import java.io.Reader;
+import java.io.StringReader;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.script.Bindings;
 import javax.script.AbstractScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptContext;
 import javax.script.Invocable;
+import javax.script.ScriptException;
 
 import clojure.lang.Var;
 
@@ -46,6 +50,28 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         //Var.pushThreadBindings();
         // How to call popThreadBindings?
         executor = Executors.newSingleThreadExecutor();
+    }
+
+    /**
+     * Submit the given callable to our executor and block until we have the
+     * result.
+     */
+    private Object submitAndGetResult(Callable<Object> c)
+    {
+        Future<Object> f = executor.submit(c);
+
+        try
+        {
+            return f.get();
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException(e);
+        }
+        catch (ExecutionException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -84,13 +110,15 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     @Override
     public Object eval(Reader reader, ScriptContext context)
     {
-        return null;
+        CallableEval c = new CallableEval(reader, context);
+
+        return submitAndGetResult(c);
     }
 
     @Override
     public Object eval(String script, ScriptContext context)
     {
-        return null;
+        return eval(new StringReader(script), context);
     }
 
     @Override // required by Invocable-interface
