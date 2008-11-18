@@ -136,7 +136,7 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
     @Override
     public ScriptEngine getScriptEngine()
     {
-        return null;
+        return new ClojureScriptEngine();
     }
 
 }
