@@ -3,7 +3,7 @@ Overview
 
 My modest attempt at providing a Clojure-engine that is compliant with JSR 223
 (the Java Scripting API). JSR 233 defines an API which makes it possible to
-interchangably use any scripting-engine for which an implementation exists by
+interchangeably use any scripting-engine for which an implementation exists by
 exposing objects from the host application to the scripting engine.
 
 Implementations exist for example for JS, Groovy, Scala, and I think Clojure
