@@ -2,11 +2,24 @@ Overview
 ========
 
 My modest attempt at providing a Clojure-engine that is compliant with JSR 223
-(the Java Scripting API), which makes it possible to interchangably use any
-scripting-engine for which an implementation exists.
+(the Java Scripting API). JSR 233 defines an API which makes it possible to
+interchangably use any scripting-engine for which an implementation exists by
+exposing objects from the host application to the scripting engine.
 
-Implemetations exist for example for JS, Groovy, Scala, and I think Clojure
+Implementations exist for example for JS, Groovy, Scala, and I think Clojure
 should not be left out.
+
+Status
+======
+
+Very rudimentary.
+
+Implementation
+==============
+
+Due to Clojure's design (which uses thread-local bindings rather than a
+dedicated context-object for different active runtimes), each
+ClojureScriptEngine has a dedicated thread on which it executes all operations.
 
 License
 =======
