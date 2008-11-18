@@ -3,6 +3,7 @@ package de.torq.clojure.jsr223;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -260,30 +261,22 @@ class CallableEval implements Callable<Object>
         {
             //repl IO support
             LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(reader);
-            OutputStreamWriter w = (OutputStreamWriter) RT.OUT.get();//new OutputStreamWriter(System.out);
+            Writer w = context.getWriter();
             Object EOF = new Object();
 
             //start the loop
-            w.write("Clojure\n");
             for(; ;)
             {
                 try
                 {
-                    //w.write(Compiler.currentNS().name + "=> ");
-                    w.write("=> ");
-                    w.flush();
                     Object r = LispReader.read(rdr, false, EOF, false);
                     if(r == EOF)
                     {
-                        w.write("\n");
                         w.flush();
                         break;
                     }
                     Object ret = Compiler.eval(r);
                     result = ret;
-                    RT.print(ret, w);
-                    w.write('\n');
-                    //w.flush();
                 }
                 catch(Throwable e)
                 {
@@ -292,11 +285,11 @@ class CallableEval implements Callable<Object>
                     {
                         c = c.getCause();
                     }
-                    ((PrintWriter) RT.ERR.get()).println(e instanceof Compiler.CompilerException ? e : c);
+                    ((PrintWriter) context.getErrorWriter()).println(e instanceof Compiler.CompilerException ? e : c);
                 }
             }
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             throw new RuntimeException(e);
         }
