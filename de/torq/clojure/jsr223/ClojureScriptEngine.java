@@ -195,57 +195,6 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     }
 }
 
-class InternalEngine extends AbstractScriptEngine
-                             implements Invocable
-{
-    @Override
-    public ScriptEngineFactory getFactory()
-    {
-        return new ClojureScriptEngineFactory();
-    }
-
-    @Override
-    public Bindings createBindings()
-    {
-        return new ClojureBindings();
-    }
-
-    @Override
-    public Object eval(Reader reader, ScriptContext context)
-    {
-        return null;
-    }
-
-    @Override
-    public Object eval(String script, ScriptContext context)
-    {
-        return null;
-    }
-
-    @Override // required by Invocable-interface
-    public <T> T getInterface(Class<T> clasz)
-    {
-        return null;
-    }
-
-    @Override // required by Invocable-interface
-    public <T> T getInterface(Object thiz, Class<T> clasz)
-    {
-        return null;
-    }
-
-    @Override // required by Invocable-interface
-    public Object invokeFunction(String name, Object... args)
-    {
-        return null;
-    }
-
-    @Override // required by Invocable-interface
-    public Object invokeMethod(Object thiz, String name, Object... args)
-    {
-        return null;
-    }
-}
 
 class CallableClojureInitialization implements Callable<Object>
 {
