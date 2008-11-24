@@ -48,7 +48,9 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     private static final ScriptEngineFactory factory = new ClojureScriptEngineFactory();
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-    private final ExecutorService executor;
+    // TODO: make private again if we have a way of safely shutting it down
+    // when the instance is deallocated
+    public final ExecutorService executor;
 
     // BEGIN From clojure.lang.Repl
     static final Symbol USER = Symbol.create(ClojureBindings.nsUser);
@@ -250,15 +252,16 @@ class CallableEval implements Callable<Object>
 
     public Object call()
     {
-        Associative a = ClojureBindings.toAssociative(context.getBindings(ScriptContext.ENGINE_SCOPE));
-        return handleInput();
+        return handleInput(ClojureBindings.toAssociative(context.getBindings(ScriptContext.ENGINE_SCOPE)));
     }
 
-    private Object handleInput()
+    private Object handleInput(Associative a)
     {
         Object result = null;
         try
         {
+            Var.pushThreadBindings(a);
+
             //repl IO support
             LineNumberingPushbackReader rdr = new LineNumberingPushbackReader(reader);
             Writer w = context.getWriter();
@@ -292,6 +295,10 @@ class CallableEval implements Callable<Object>
         catch (Exception e)
         {
             throw new RuntimeException(e);
+        }
+        finally
+        {
+            Var.pushThreadBindings(a);
         }
 
         return result;
