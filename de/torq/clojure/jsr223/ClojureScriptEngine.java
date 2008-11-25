@@ -40,6 +40,12 @@ import clojure.lang.Var;
  * it has to communicate with a reference to RT on another thread. This is not
  * important to users of this class, I just felt a need to justify my rather
  * strange design.
+ *
+ * TODO:
+ * - How to retrieve a map of current bindings? Use namespace-stuff?
+ * - get("a") can probably be implemented by simply evaluating "a"
+ * - What's best for set("a", (Object)a)? Use Var.find and Var.set?
+ *
  */
 public class ClojureScriptEngine extends AbstractScriptEngine
                                  implements Invocable
@@ -48,9 +54,7 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     private static final ScriptEngineFactory factory = new ClojureScriptEngineFactory();
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-    // TODO: make private again if we have a way of safely shutting it down
-    // when the instance is deallocated
-    public final ExecutorService executor;
+    private final ExecutorService executor;
 
     // BEGIN From clojure.lang.Repl
     static final Symbol USER = Symbol.create(ClojureBindings.nsUser);
@@ -119,6 +123,8 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         // TODO: we need to make sure the thread is interruptible;
         // newSingleThreadExecutor does not make any guarantees about that, so
         // we need to find another mechanism for spawning the thread.
+        // TODO: maybe the thread-locals (in clojure.lang.Var) have some
+        // implicit or explicit reference to the thread.
         executor.shutdownNow();
         System.out.println("leaving: finalize()");
     }
@@ -167,9 +173,9 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     @Override
     public Object eval(String script, ScriptContext context)
     {
-        System.out.println("entering: eval(String script, ScriptContext context)");
+        //System.out.println("entering: eval(String script, ScriptContext context)");
         Object result = eval(new StringReader(script), context);
-        System.out.println("leaving: eval(String script, ScriptContext context)");
+        //System.out.println("leaving: eval(String script, ScriptContext context)");
         return result;
     }
 
@@ -298,7 +304,7 @@ class CallableEval implements Callable<Object>
         }
         finally
         {
-            Var.pushThreadBindings(a);
+            Var.popThreadBindings();
         }
 
         return result;
