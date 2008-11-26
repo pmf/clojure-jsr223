@@ -27,7 +27,7 @@ To test it, you can use something like:
 Status
 ======
 
-ENGINE_SCOPE bindings work.
+Engine-internal bindings work.
 
 Implementation
 ==============
@@ -40,5 +40,5 @@ License
 =======
 
 Since I included parts of clojure.lang.Repl and use classes from
-clojure.lang.*, all stuff is under the CPL (see CPL.txt).
+the clojure.lang-package, all stuff is under the CPL (see CPL.txt).
 
