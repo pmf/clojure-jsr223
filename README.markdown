@@ -9,10 +9,25 @@ exposing objects from the host application to the scripting engine.
 Implementations exist for example for JS, Groovy, Scala, and I think Clojure
 should not be left out.
 
+Building
+========
+
+NOTE: Requires ant 1.7.0+ (due to the service-task, which only exists since
+1.7.0). Sorry for any inconvenience this might cause.
+
+Builds clojure-jsr223.jar, which will contain the implementation of a JSR
+223-compliant wrapper around Clojure.  To compile and use it, you must have
+built the regular clojure.jar and added it to your classpath.
+
+To test it, you can use something like:
+
+    jrunscript -cp clojure-jsr223.jar:/my/path/to/clojure.jar -l "Clojure"
+
+
 Status
 ======
 
-Very rudimentary.
+ENGINE_SCOPE bindings work.
 
 Implementation
 ==============
