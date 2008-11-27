@@ -6,8 +6,10 @@ My modest attempt at providing a Clojure-engine that is compliant with JSR 223
 interchangeably use any scripting-engine for which an implementation exists by
 exposing objects from the host application to the scripting engine.
 
-Implementations exist for example for JS, Groovy, Scala, and I think Clojure
-should not be left out.
+Implementations exist for example for JS, Jython, JRuby, Groovy, Scala, and I
+think Clojure should not be left out. A long list of languages for which JSR
+223 engines exists can be found at
+[the Java scripting site](https://scripting.dev.java.net/).
 
 Building
 ========
