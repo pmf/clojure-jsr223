@@ -81,6 +81,7 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     );
 
     public ClojureScriptEngine()
+        throws ScriptException
     {
         // TODO: use ScriptContext's engineScope/globalScope; store bindings
         // locally; push on stack before each invocation and pop off stack
@@ -95,6 +96,7 @@ public class ClojureScriptEngine extends AbstractScriptEngine
      * result.
      */
     private Object submitAndGetResult(Callable<Object> c)
+        throws ScriptException
     {
         Future<Object> f = executor.submit(c);
 
@@ -108,7 +110,7 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         }
         catch (ExecutionException e)
         {
-            throw new RuntimeException(e);
+            throw new ScriptException(e);
         }
     }
 
@@ -164,14 +166,23 @@ public class ClojureScriptEngine extends AbstractScriptEngine
 
     @Override
     public Object eval(Reader reader, ScriptContext context)
+        throws ScriptException
     {
         CallableEval c = new CallableEval(reader, context);
 
-        return submitAndGetResult(c);
+        try
+        {
+            return submitAndGetResult(c);
+        }
+        catch (Exception e)
+        {
+            throw new ScriptException(e);
+        }
     }
 
     @Override
     public Object eval(String script, ScriptContext context)
+        throws ScriptException
     {
         //System.out.println("entering: eval(String script, ScriptContext context)");
         Object result = eval(new StringReader(script), context);
