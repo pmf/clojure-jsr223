@@ -305,9 +305,8 @@ class CallableEval implements Callable<Object>
                     {
                         c = c.getCause();
                     }
-                    //((PrintWriter) context.getErrorWriter()).println(e instanceof Compiler.CompilerException ? e : c);
                     ScriptException scriptException = new ScriptException("Some exception in Clojure RT");
-                    scriptException.initCause(c);
+                    scriptException.initCause(e instanceof Compiler.CompilerException ? e : c);
                     throw scriptException;
                 }
             }
