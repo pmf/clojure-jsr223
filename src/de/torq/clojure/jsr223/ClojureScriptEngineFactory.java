@@ -1,5 +1,6 @@
 package de.torq.clojure.jsr223;
 
+import javax.script.ScriptException;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngine;
 import java.util.List;
@@ -136,7 +137,14 @@ public class ClojureScriptEngineFactory implements ScriptEngineFactory
     @Override
     public ScriptEngine getScriptEngine()
     {
-        return new ClojureScriptEngine();
+        try
+        {
+            return new ClojureScriptEngine();
+        }
+        catch (ScriptException ex)
+        {
+            return null;
+        }
     }
 
 }
