@@ -26,13 +26,35 @@
 	<target name="compile" depends="init"
 		description="Compile sources.">
 		<!-- target must be 1.6, since javax.script did not exist before -->
-		<javac srcdir="${src}" destdir="${build}" includeJavaRuntime="yes" debug="true" target="1.6"/>
+		<javac srcdir="${src}" destdir="${build}" includeJavaRuntime="yes" debug="true" target="1.5">
+                  <classpath>
+                    <pathelement location="c:/Users/pmf/Desktop/dev/clojure/clojure.jar"/>
+                    <pathelement location="c:/eclipse/plugins/org.eclipse.osgi_3.5.0.v20090520.jar"/>
+                    <pathelement location="c:/eclipse/plugins/org.eclipse.osgi.services_3.2.0.v20090520-1800.jar"/>
+                  </classpath>
+                 </javac>
 	</target>
 
 	<target name="jar" depends="compile"
 		description="Create jar file.">
+                <mkdir dir="${build}/OSGI-INF"/>
+                <copy file="component.xml" tofile="${build}/OSGI-INF/component.xml"/>
 		<jar jarfile="${clojure_jsr223_jar}" basedir="${build}">
-			<service type="javax.script.ScriptEngineFactory" provider="de.torq.clojure.jsr223.ClojureScriptEngineFactory"/>
+                  <service type="javax.script.ScriptEngineFactory" provider="de.torq.clojure.jsr223.ClojureScriptEngineFactory"/>
+                  <manifest>
+                    <attribute name="Main-Class" value="de.torq.clojure.jsr223.Activator"/>
+                    <attribute name="Class-Path" value="."/>
+                    <attribute name="Service-Component" value="OSGI-INF/component.xml"/>
+                    <attribute name="Bundle-ClassPath" value="."/>
+                    <attribute name="Bundle-ManifestVersion" value="2"/>
+                    <attribute name="Bundle-Name" value="clojure-jsr223"/>
+                    <attribute name="Bundle-SymbolicName" value="clojure-jsr223"/>
+                    <attribute name="Bundle-Version" value="0.0.0"/>
+                    <!-- <attribute name="Bundle-Activator" value="de.torq.clojure.jsr223.Activator"/> -->
+                    <attribute name="Import-Package" value="org.osgi.framework, org.osgi.service.component, org.xml.sax, org.xml.sax.helpers, javax.xml.parsers, javax.script"/>
+                    <attribute name="Export-Package" value="de.torq.clojure.jsr223, clojure, clojure.lang"/>
+                  </manifest>
+                  <zipfileset excludes="META-INF/*" src="c:/Users/pmf/Desktop/dev/clojure/clojure.jar"/>
 		</jar>
 	</target>
 
