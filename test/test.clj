@@ -1,34 +1,28 @@
 ;; Basic tests for clojure-jsr223
 ;;
 ;; Make sure clojure-jsr233.jar and clojure.jar is in your classpath
-(defmacro my-assert [assertion-message predicate]
-  `(try
-     (do
-       (assert ~predicate)
-       (println (str "OK    : " ~assertion-message)))
-     (catch Exception e#
-       (println (str "FAILED: " ~assertion-message)))))
+(use 'clojure.test)
 
 (def sem (javax.script.ScriptEngineManager.))
 
 (def cse (.getEngineByName sem "Clojure"))
 
 (.put cse "foo" "bar")
-(my-assert "put() must set the root-bound var to the correct value"
-        (= "bar" (.eval cse "foo")))
+(is (= "bar" (.eval cse "foo"))
+    "put() must set the root-bound var to the correct value")
 
 (def cse2 (.getEngineByName sem "Clojure"))
 
-(my-assert "evaluating the var must return the correct result"
-        (= "bar" (.eval cse2 "foo")))
+(is (= "bar" (.eval cse2 "foo"))
+    "evaluating the var must return the correct result")
 
 (.put cse2 "foo" "bazz")
-(my-assert "put() must set the thread-local var to the correct value"
-        (= "bazz" (.eval cse2 "foo")))
+(is (= "bazz" (.eval cse2 "foo"))
+    "put() must set the thread-local var to the correct value")
 
-(my-assert "get() must return the correct value for the var (expected, since get() is not implemented yet)"
-        (= "bazz" (.get cse2 "foo2")))
+(is (= "bazz" (.get cse2 "foo2"))
+    "get() must return the correct value for the var (expected, since get() is not implemented yet)")
 
 ;; Make sure the changes in cse2 do not affect the binding of the var foo in cse
-(my-assert "evaluating the var must return the correct value"
-        (= "bar" (.eval cse "foo")))
+(is (= "bar" (.eval cse "foo"))
+    "evaluating the var must return the correct value")
