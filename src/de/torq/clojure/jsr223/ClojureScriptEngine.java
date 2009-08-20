@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.script.AbstractScriptEngine;
 import javax.script.Bindings;
@@ -45,7 +44,7 @@ import clojure.lang.ISeq;
  * strange design.
  *
  * TODO:
- * - How to retrieve a map of current bindings? Use namespace-stuff?
+ * - How to retrieve a map of current bindings? Use namespace-introspection?
  * - get("a") can probably be implemented by simply evaluating "a"
  * - What's best for set("a", (Object)a)? Use Var.find and Var.set?
  *
@@ -56,11 +55,9 @@ public class ClojureScriptEngine extends AbstractScriptEngine
 
     private static final ScriptEngineFactory factory = new ClojureScriptEngineFactory();
 
-    private AtomicBoolean closed = new AtomicBoolean(false);
     private final ExecutorService executor;
 
     private final Symbol instanceNS = Symbol.create("cse-" + Integer.toString(RT.nextID()));
-    //private final Symbol instanceNS = Symbol.create("user");
 
     // BEGIN From clojure.lang.Repl
     static final Symbol CLOJURE = Symbol.create(ClojureBindings.nsClojure);
@@ -119,44 +116,6 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         {
             throw new ScriptException(e);
         }
-    }
-
-    /**
-     * We need to perform some cleanup (Clojure-related stuff has to be done on
-     * the executor's thread).
-     */
-    protected void finalize() throws Throwable
-    {
-        System.out.println("entering: finalize()");
-        submitAndGetResult(new CallableClojureFinalization());
-        // TODO: we need to make sure the thread is interruptible;
-        // newSingleThreadExecutor does not make any guarantees about that, so
-        // we need to find another mechanism for spawning the thread.
-        // TODO: maybe the thread-locals (in clojure.lang.Var) have some
-        // implicit or explicit reference to the thread.
-        executor.shutdownNow();
-        System.out.println("leaving: finalize()");
-    }
-
-    /**
-     * Returns true if this ScriptEngine has been closed; further invocation of
-     * any methods will have undefined behaviour.
-     */
-    public boolean isClosed()
-    {
-        return closed.get();
-    }
-
-    /*
-     * Closes this ScriptEngine.
-     * TODO: needed because I need to call Var.popThreadBindings when we are
-     *       done with this instance; someone please find a better way...
-     */
-    public void close()
-    {
-        closed.compareAndSet(false, true);
-
-        // Var.popThreadBindings();
     }
 
     @Override
