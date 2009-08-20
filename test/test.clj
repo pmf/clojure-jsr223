@@ -15,7 +15,8 @@
 
 (def cse2 (.getEngineByName sem "Clojure"))
 
-(is (= "bar" (.eval cse2 "foo"))
+(.put cse2 "foo" "bar2")
+(is (= "bar2" (.eval cse2 "foo"))
     "evaluating the var must return the correct result")
 
 (.put cse2 "foo" "bazz")

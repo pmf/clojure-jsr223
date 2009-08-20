@@ -8,6 +8,7 @@ import clojure.lang.Associative;
 import clojure.lang.PersistentHashMap;
 import clojure.lang.RT;
 import clojure.lang.Var;
+import clojure.lang.Symbol;
 
 // TODO:
 // - support fully qualified names (as desribed in JSR 223 released version, p. 141)
@@ -33,7 +34,7 @@ public class ClojureBindings extends HashMap<String, Object>
      *
      * NOTE: Due to thread-local vars, this must be called on the correct thread!
      */
-    public static Associative toAssociative(Bindings b)
+    public static Associative toAssociative(Bindings b, Symbol ns)
     {
         Associative result = PersistentHashMap.create();
         for (Map.Entry<String, Object> e : b.entrySet())
@@ -45,7 +46,7 @@ public class ClojureBindings extends HashMap<String, Object>
             // between ClojureScriptEngine-instances by throwing an
             // IllegalStateException when trying to get the value of the var,
             // but that's a matter of taste, I think.
-            Var var = RT.var(nsUser, e.getKey(), e.getValue());
+            Var var = RT.var(ns.getName(), e.getKey(), e.getValue());
             result = result.assoc(var, e.getValue());
         }
 

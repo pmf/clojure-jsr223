@@ -57,8 +57,10 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     private AtomicBoolean closed = new AtomicBoolean(false);
     private final ExecutorService executor;
 
+    private final Symbol instanceNS = Symbol.create("cse-" + Integer.toString(RT.nextID()));
+    //private final Symbol instanceNS = Symbol.create("user");
+
     // BEGIN From clojure.lang.Repl
-    static final Symbol USER = Symbol.create(ClojureBindings.nsUser);
     static final Symbol CLOJURE = Symbol.create(ClojureBindings.nsClojure);
 
     static final Var in_ns = RT.var(ClojureBindings.nsClojure, "in-ns");
@@ -90,7 +92,8 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         //Var.pushThreadBindings();
         executor = Executors.newSingleThreadExecutor(
             new ClojureScriptEngineThreadFactory());
-        submitAndGetResult(new CallableClojureInitialization(globalBindings));
+        submitAndGetResult(new CallableClojureInitialization(globalBindings, instanceNS));
+        eval("(ns " + instanceNS.getName() + " (:refer-clojure))");
     }
 
     /**
@@ -170,7 +173,7 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     public Object eval(Reader reader, ScriptContext context)
         throws ScriptException
     {
-        CallableEval c = new CallableEval(reader, context);
+        CallableEval c = new CallableEval(reader, context, instanceNS);
 
         try
         {
@@ -221,10 +224,12 @@ public class ClojureScriptEngine extends AbstractScriptEngine
 class CallableClojureInitialization implements Callable<Object>
 {
     private final Associative bindings;
+    private final Symbol ns;
 
-    public CallableClojureInitialization(Associative bindings)
+    public CallableClojureInitialization(Associative bindings, Symbol ns)
     {
         this.bindings = bindings;
+        this.ns = ns;
     }
 
     public Object call()
@@ -232,7 +237,7 @@ class CallableClojureInitialization implements Callable<Object>
         try
         {
             Var.pushThreadBindings(bindings);
-            ClojureScriptEngine.in_ns.invoke(ClojureScriptEngine.USER);
+            ClojureScriptEngine.in_ns.invoke(ns);
             ClojureScriptEngine.refer.invoke(ClojureScriptEngine.CLOJURE);
 
             return null;
@@ -262,16 +267,18 @@ class CallableEval implements Callable<Object>
 {
     private final Reader reader;
     private final ScriptContext context;
+    private final Symbol ns;
 
-    public CallableEval(Reader reader, ScriptContext context)
+    public CallableEval(Reader reader, ScriptContext context, Symbol ns)
     {
         this.reader = reader;
         this.context = context;
+        this.ns = ns;
     }
 
     public Object call()
     {
-        return handleInput(ClojureBindings.toAssociative(context.getBindings(ScriptContext.ENGINE_SCOPE)));
+        return handleInput(ClojureBindings.toAssociative(context.getBindings(ScriptContext.ENGINE_SCOPE), ns));
     }
 
     private Object handleInput(Associative a)
