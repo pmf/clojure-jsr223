@@ -6,6 +6,8 @@
 (def sem (javax.script.ScriptEngineManager.))
 
 (def cse (.getEngineByName sem "Clojure"))
+(is (not= nil cse)
+    "Either clojure-jsr233.jar is not in the classpath or the SPI is not included.")
 
 (.put cse "foo" "bar")
 (is (= "bar" (.eval cse "foo"))
