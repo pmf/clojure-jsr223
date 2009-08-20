@@ -30,6 +30,8 @@ import clojure.lang.LispReader;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import clojure.lang.IFn;
+import clojure.lang.ISeq;
 
 /**
  * The design of Clojure is somewhat special in that there is no way to get
@@ -209,8 +211,19 @@ public class ClojureScriptEngine extends AbstractScriptEngine
 
     @Override // required by Invocable-interface
     public Object invokeFunction(String name, Object... args)
+        throws ScriptException
     {
-        return null;
+        CallableClojureInvokeFunction c =
+            new CallableClojureInvokeFunction(instanceNS, name, args);
+
+        try
+        {
+            return submitAndGetResult(c);
+        }
+        catch (Exception e)
+        {
+            throw new ScriptException(e);
+        }
     }
 
     @Override // required by Invocable-interface
@@ -333,6 +346,35 @@ class CallableEval implements Callable<Object>
     }
 }
 
+class CallableClojureInvokeFunction implements Callable<Object>
+{
+    private final Symbol ns;
+    private final String name;
+    private final Object[] args;
+
+    public CallableClojureInvokeFunction(Symbol ns, String name, Object... args)
+    {
+        this.ns = ns;
+        this.name = name;
+        this.args = args;
+    }
+
+    public Object call()
+    {
+        try
+        {
+            ISeq seq = (ISeq)((IFn)(RT.var("clojure.core", "seq").get())).invoke(args);
+            // TODO: we need to be able to accept vars from other namespaces;
+            // either resolve the name or inspect the name for a namespace and
+            // extract it.
+            return ((IFn)(RT.var(ns.getName(), name).get())).applyTo(seq);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+}
 /**
  * Provides a ThreadFactory-implementation that returns daemon-threads (so
  * ClojureScriptEngines will not prevent the JVM from exiting).
