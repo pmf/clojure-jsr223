@@ -22,9 +22,11 @@ Builds clojure-jsr223.jar, which will contain the implementation of a JSR
 built the regular clojure.jar and added it to your classpath.
 
 To build as an OSGi-component, you have to have the OSGi-framework stuff
-somewhere on your classpath (if you are using Equinox, org.eclipse.osgi_xxx.jar
-and org.eclipse.osgi.services_xxx.jar should be enough). The OSGi-bundle will
-include the contents of clojure.jar, which is why you need to point the
+somewhere on your classpath. If you are using Equinox, org.eclipse.osgi_xxx.jar
+and org.eclipse.osgi.services_xxx.jar should be enough (they are found in the
+plugins-directory of your Eclipse installation directory); if you are using the
+Knopflerfish-framework, including framework.jar should suffice. The OSGi-bundle
+will include the contents of clojure.jar, which is why you need to point the
 Ant-flag clojure_jar to your clojure library (as opposed to the regular
 clojure-jsr223.jar, which requires clojure.jar to be on the classpath to run).
 
