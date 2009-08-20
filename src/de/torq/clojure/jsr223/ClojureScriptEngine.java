@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.script.AbstractScriptEngine;
@@ -87,7 +88,8 @@ public class ClojureScriptEngine extends AbstractScriptEngine
         // locally; push on stack before each invocation and pop off stack
         // after each invocation of a method
         //Var.pushThreadBindings();
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newSingleThreadExecutor(
+            new ClojureScriptEngineThreadFactory());
         submitAndGetResult(new CallableClojureInitialization(globalBindings));
     }
 
@@ -321,6 +323,24 @@ class CallableEval implements Callable<Object>
         }
 
         return result;
+    }
+}
+
+/**
+ * Provides a ThreadFactory-implementation that returns daemon-threads (so
+ * ClojureScriptEngines will not prevent the JVM from exiting).
+ */
+class ClojureScriptEngineThreadFactory implements ThreadFactory
+{
+    public Thread newThread(Runnable r)
+    {
+        Thread result = new Thread(r);
+        result.setContextClassLoader(
+            Thread.currentThread().getContextClassLoader());
+        result.setDaemon(true);
+
+        return result;
+
     }
 }
 
