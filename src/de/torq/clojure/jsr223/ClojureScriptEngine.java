@@ -24,13 +24,14 @@ import javax.script.ScriptException;
 
 import clojure.lang.Associative;
 import clojure.lang.Compiler;
+import clojure.lang.IFn;
+import clojure.lang.ISeq;
 import clojure.lang.LineNumberingPushbackReader;
 import clojure.lang.LispReader;
+import clojure.lang.Namespace;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
-import clojure.lang.IFn;
-import clojure.lang.ISeq;
 
 /**
  * The design of Clojure is somewhat special in that there is no way to get
@@ -58,6 +59,8 @@ public class ClojureScriptEngine extends AbstractScriptEngine
     private final ExecutorService executor;
 
     private final Symbol instanceNS = Symbol.create("cse-" + Integer.toString(RT.nextID()));
+
+    public final String namespaceSeparator = "/";
 
     // BEGIN From clojure.lang.Repl
     static final Symbol CLOJURE = Symbol.create(ClojureBindings.nsClojure);
@@ -322,11 +325,40 @@ class CallableClojureInvokeFunction implements Callable<Object>
     {
         try
         {
-            ISeq seq = (ISeq)((IFn)(RT.var("clojure.core", "seq").get())).invoke(args);
-            // TODO: we need to be able to accept vars from other namespaces;
-            // either resolve the name or inspect the name for a namespace and
-            // extract it.
-            return ((IFn)(RT.var(ns.getName(), name).get())).applyTo(seq);
+            // We need to use Symbol.intern vs. Symbol.create because of
+            // internal hasing going on within the Symbol-class.
+            Symbol nameSym = Symbol.intern(ns.getName(), name);
+            Var fnVar = (Var)Compiler.maybeResolveIn(Namespace.find(ns), nameSym);
+
+            if (fnVar == null)
+            {
+                // We could not resolve the function within the current
+                // namespace, so try a broader scope
+                fnVar = (Var)Compiler.maybeResolveIn(Namespace.find(ns), Symbol.create(name.intern()));
+            }
+
+            if (fnVar == null)
+            {
+                throw new ScriptException("Function " + name + " cannot be resolved.");
+            }
+
+            if (args != null)
+            {
+                if (args.length > 0)
+                {
+                    ISeq seq =
+                        (ISeq)RT.var("clojure.core", "seq").invoke(args);
+                    return fnVar.applyTo(seq);
+                }
+                else
+                {
+                    return fnVar.invoke();
+                }
+            }
+            else
+            {
+                return fnVar.invoke();
+            }
         }
         catch (Exception e)
         {
