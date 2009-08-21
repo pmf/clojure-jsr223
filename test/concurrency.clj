@@ -6,7 +6,9 @@
   "Simulate a long blocking operation."
   (do
     (println n "started")
-    (Thread/sleep 10000)
+    (doseq [i (range 10)] (do
+                            (Thread/sleep 10000)
+                            (println n i)))
     (println n "finished")))
 
 (def engines (map #(doto (de.torq.clojure.jsr223.ClojureScriptEngine.)
