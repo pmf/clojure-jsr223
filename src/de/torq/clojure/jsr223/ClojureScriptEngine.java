@@ -190,8 +190,35 @@ public class ClojureScriptEngine extends AbstractScriptEngine
 
     @Override // required by Invocable-interface
     public Object invokeMethod(Object thiz, String name, Object... args)
+        throws ScriptException
     {
-        return null;
+        CallableClojureInvokeMethod c =
+            new CallableClojureInvokeMethod(instanceNS, thiz, name, args);
+
+        try
+        {
+            return submitAndGetResult(c);
+        }
+        catch (Exception e)
+        {
+            throw new ScriptException(e);
+        }
+    }
+
+    /**
+     * Create an ISeq from an array of objects.
+     */
+    public static ISeq makeSeqFromArray(Object[] array)
+        throws ScriptException
+    {
+        try
+        {
+            return (ISeq)RT.var("clojure.core", "seq").invoke(array);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 }
 
@@ -346,9 +373,7 @@ class CallableClojureInvokeFunction implements Callable<Object>
             {
                 if (args.length > 0)
                 {
-                    ISeq seq =
-                        (ISeq)RT.var("clojure.core", "seq").invoke(args);
-                    return fnVar.applyTo(seq);
+                    return fnVar.applyTo(ClojureScriptEngine.makeSeqFromArray(args));
                 }
                 else
                 {
@@ -366,6 +391,55 @@ class CallableClojureInvokeFunction implements Callable<Object>
         }
     }
 }
+
+class CallableClojureInvokeMethod implements Callable<Object>
+{
+    private static String MEMFN = "memfn".intern();
+    private final Symbol ns;
+    private final String name;
+    private final Object thiz;
+    private final Object[] args;
+
+    public CallableClojureInvokeMethod(Symbol ns, Object thiz, String name, Object... args)
+    {
+        this.ns = ns;
+        this.thiz = thiz;
+        this.name = name;
+        this.args = args;
+    }
+
+    public Object call()
+    {
+        try
+        {
+            Symbol nameSym = Symbol.intern(name.intern());
+
+            // Prepend the name to the args
+            Object[] name_plus_args = new Object[args.length + 1];
+            name_plus_args[0] = nameSym;
+            for (int i = 0; i < args.length; i++)
+            {
+                name_plus_args[i + 1] = args[i];
+            }
+
+            // The structure we need to build up has to look like this:
+            // (. obj (nameOfMethod arg1 arg2))
+            return Compiler.eval(
+                ClojureScriptEngine.makeSeqFromArray(
+                    new Object[]
+                    {Symbol.intern(".".intern()),
+                     thiz,
+                     ClojureScriptEngine.makeSeqFromArray(name_plus_args)
+                    }));
+
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+}
+
 /**
  * Provides a ThreadFactory-implementation that returns daemon-threads (so
  * ClojureScriptEngines will not prevent the JVM from exiting).
